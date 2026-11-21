@@ -1,44 +1,23 @@
 # Native Video Playback Architecture
 
-This document defines the base-case-first native playback stack for Sigma's infinite media canvas. The implementation is intentionally gated: one high-priority stream is allowed before calibration, and multi-stream scaling is enabled only after the local machine profile validates the 4K base case.
+Sigma starts with a single-stream cap on an uncalibrated machine. Probe and frontend metrics can raise the cap before full validation. A profile that passes the 4K base case unlocks the 32-stream cap, subject to resource budgets and rendered size.
 
 ## Platform Validation
 
-- Tauri v2 commands remain the control plane. Commands carry manifests, telemetry summaries, and calibration results.
+- Tauri v2 commands carry manifests, profile requests, calibration requests, and frontend metrics. Backend telemetry snapshots use a separate Tauri channel.
 - Tauri v2 channels are the frame plane. Frame payloads are sent as `InvokeResponseBody::Raw(Vec<u8>)`, not JSON.
 - Tauri events are not used for frames because they are JSON-oriented and intended for lower-throughput messages.
 - The renderer probes `OffscreenCanvas.transferControlToOffscreen()` and starts a dedicated worker before any native manifest is sent.
 - The worker probes `navigator.gpu.requestAdapter()` and `OffscreenCanvas.getContext("webgpu")`.
 - If WebGPU is unavailable, the worker falls back to an OffscreenCanvas 2D compositor.
-- The browser `<video>` path remains the safe presentation path until the native profile is validated or explicitly forced through `localStorage["sigma.nativeVideo.enabled"] = "true"`.
+- The browser `<video>` path remains available. The native surface requires worker and OffscreenCanvas support, plus either a validated profile or `localStorage["sigma.nativeVideo.enabled"] = "true"`.
 - To run the base-case probe from the app, also set `localStorage["sigma.nativeVideo.calibrate"] = "true"` and keep one source video visible; the first visible video is decoded through FFmpeg into the worker channel.
 
 ## Architecture
 
-```mermaid
-flowchart LR
-  React["React canvas state\n(layout metadata only)"]
-  Manifest["Manifest debounce hook\nvisible assets + rendered pixels + focus"]
-  Commands["Tauri commands\ncontrol/profile/calibration"]
-  Runtime["NativeVideoState"]
-  Registry["AssetRegistry\nlatest visible manifest"]
-  Arbiter["Arbiter\nbounded hysteretic tier assignment"]
-  Monitor["ResourceMonitor\n150 ms rusage sampling"]
-  Workers["DecodeWorkers\none per visible asset\nsuspend/resume"]
-  Broker["FrameBroker\nbounded queue + raw packets"]
-  Channel["Tauri Channel\nbinary ArrayBuffer packets"]
-  Worker["JS Worker\npacket parse + compositor loop"]
-  Canvas["OffscreenCanvas\nWebGPU preferred, 2D fallback"]
-  Profile["Machine-local profile\nnative-video-profile.json"]
+See the [generated native media diagram](architecture/media.md) for the IPC, frame, worker and profile paths. The [architecture graph](architecture/graph.json) records the source evidence for those relationships.
 
-  React --> Manifest --> Commands --> Runtime
-  Runtime --> Registry --> Arbiter
-  Profile --> Arbiter
-  Monitor --> Arbiter
-  Arbiter --> Workers --> Broker --> Channel --> Worker --> Canvas
-  Worker --> Commands
-  Commands --> Profile
-```
+The [Rust decode worker](../src-tauri/src/native_video/worker.rs) runs FFmpeg from the application's PATH for active assignments. The [frame writer](../src-tauri/src/native_video/frame_packet.rs) packs the decoded YUV420 planes for the [frontend compositor](../src/workers/nativeVideoCompositor.worker.ts). The [base-case command](../src-tauri/src/native_video/commands.rs) has its own probe path.
 
 ## Rust Subsystems
 
@@ -50,9 +29,9 @@ Ownership:
 - Publishes process-local CPU and RSS telemetry every 150 ms through a watch channel.
 
 Sampling:
-- CPU peak core usage is derived from `getrusage()` user+system deltas divided by wall time. A value of `1.0` means one full core.
-- RAM is currently process peak RSS from `getrusage()`.
-- VRAM is not hard-measured in this subsystem yet; it remains an explicit calibrated/optional assumption.
+- CPU core usage is derived from process CPU-time deltas divided by wall time. A value of `1.0` means one full core.
+- CPU time and peak RSS come from platform process APIs. Unix uses `getrusage()`.
+- The profile estimates a VRAM budget from detected or default capacity. The resource monitor samples CPU and RSS.
 
 ### AssetRegistry
 
@@ -71,8 +50,7 @@ Ownership:
 - Inputs are manifest, profile, telemetry pressure, and previous decisions.
 
 Rules:
-- Before base-case validation: maximum active streams is `1`.
-- After base-case validation: maximum active streams is `32`.
+- Uncalibrated profiles cap active streams at `1`. Partial calibration can raise the cap to `2` or `4`, depending on the available probe and frontend metrics. Validated profiles cap active streams at `32`.
 - Assets are sorted by `priority = focus * 4 + center * 2 + sqrt(visible_area / canvas_area)`.
 - Each asset receives the highest fixed tier whose predicted cumulative cost fits the safe budget.
 - Upgrade requires explicit headroom and minimum dwell time.
@@ -82,27 +60,25 @@ Rules:
 
 Ownership:
 - One async worker exists per visible asset.
-- The steady-state visible-asset worker currently uses a synthetic RGBA generator as the packet-producing decode backend scaffold.
-- The base-case probe can drive a real source file through FFmpeg rawvideo RGBA by passing `sourcePath` to `native_video_run_base_case_probe`; without `sourcePath`, it uses the synthetic generator.
-- The same packet, broker, telemetry, and compositor contracts are used by both probe paths.
+- Active assignments launch a looping FFmpeg subprocess with audio disabled. FFmpeg resamples the source to the assigned dimensions and frame rate and writes planar `yuv420p` rawvideo to stdout. The worker reads one frame at a time and packs it into a pooled SVF1 packet.
+- `native_video_run_base_case_probe` selects a separate FFmpeg YUV420 probe when given a `sourcePath`. With no source, it generates synthetic YUV420 packets to exercise the frame channel and compositor. Probe packets go directly to the supplied channel.
 - Workers are controlled through `watch::Sender<WorkerAssignment>`.
 
 Lifetime:
 - `Active` assignments emit frames at the assigned tier and fps.
-- `Suspended` assignments keep the worker alive but stop frame generation.
+- On reassignment the running worker stops its current decoder. `Suspended` assignments wait for another assignment without decoding. Decoder failures can retry after a short delay or reassignment.
 - Removed assets abort their worker task.
 
 ### FrameBroker
 
 Ownership:
 - Owns the bounded decoded-frame queue.
-- Emits raw binary frame packets through a broadcast channel consumed by Tauri channel subscribers.
+- Drains the bounded queue, keeps the latest queued frame per stream in each drain, and dispatches raw packets directly to registered Tauri channel subscribers.
 - Tracks delivered frames, dropped frames, queue depth, and pressure.
 
 Hard caps:
 - Broker input queue: `96` packets.
-- Broadcast queue: `32` packets.
-- If the queue saturates, decode workers back off and frames are dropped before unbounded growth.
+- The Rust packet pool is sized to the broker queue depth plus two. Workers back off under queue pressure and drop frames when a packet buffer is unavailable.
 
 ## Binary Frame Packet Format
 
@@ -113,23 +89,23 @@ All integer fields are little-endian. Header length is fixed at 64 bytes.
 | 0 | 4 | Magic: `SVF1` |
 | 4 | 1 | Version: `1` |
 | 5 | 1 | Header length: `64` |
-| 6 | 1 | Pixel format: `1 = RGBA8` |
+| 6 | 1 | Pixel format: `2 = planar YUV420` |
 | 7 | 1 | Flags |
 | 8 | 8 | Sequence |
 | 16 | 8 | PTS microseconds |
 | 24 | 8 | Stable FNV-1a stream id |
 | 32 | 4 | Decode width |
 | 36 | 4 | Decode height |
-| 40 | 4 | Stride bytes |
+| 40 | 4 | Luma stride in bytes |
 | 44 | 4 | Payload bytes |
 | 48 | 2 | Quality tier id |
 | 50 | 2 | Reserved |
-| 52 | 4 | Layout epoch |
-| 56 | 4 | Source width |
-| 60 | 4 | Source height |
-| 64 | N | RGBA8 payload |
+| 52 | 4 | Y plane offset from packet start |
+| 56 | 4 | U plane offset from packet start |
+| 60 | 4 | V plane offset from packet start |
+| 64 | N | Contiguous Y, U, V planes |
 
-The stream id is `FNV-1a-64(asset.id)`. The worker computes the same id for layout metadata, so frame packets never need JSON metadata alongside pixels.
+Y has `width × height` bytes, and each chroma plane has `width/2 × height/2` bytes. Decode dimensions are even. The worker derives the packed plane offsets from the header length and decode dimensions. The steady-state stream id is `FNV-1a-64(asset.id)`. The worker computes the same id for layout metadata, so frame packets never need JSON metadata alongside pixels.
 
 ## Frontend Compositor Loop
 
@@ -147,11 +123,11 @@ Worker responsibilities:
   - `navigator.gpu.requestAdapter()`
   - `requestDevice()`
   - `canvas.getContext("webgpu")`
-  - upload RGBA payloads with `queue.writeTexture()`
-  - render textured quads at display resolution
+  - upload Y, U and V planes with `queue.writeTexture()`
+  - convert the planes to RGBA with a compute shader and render textured quads at display resolution
 - Fallback to OffscreenCanvas 2D:
-  - write payloads into per-stream scratch canvases
-  - draw scaled quads into the display canvas
+  - convert YUV420 to RGBA in the worker and create an `ImageBitmap`
+  - draw the bitmap through a per-stream scratch canvas into the display canvas
 - Post upload/composite/drop/throughput metrics back to Rust.
 
 ## Resource Formulas
@@ -159,13 +135,13 @@ Worker responsibilities:
 Safe budget:
 
 ```text
-B_total = 0.8 * min(B_cpu_decode, B_ipc, B_ram_bw)
+B_total = min(B_cpu_decode, B_ipc, 0.8 * B_ram_bw)
 ```
 
 Tier raw byte rate:
 
 ```text
-raw_bytes_per_sec = width * height * bytes_per_pixel * fps
+raw_bytes_per_sec = width * height * 1.5 * fps
 ```
 
 Predicted tier cost:
@@ -209,7 +185,7 @@ The target is 32 source assets, not 32 decoded 4K outputs.
 
 ## Validation Plan
 
-Base case must pass before scaling:
+The profile validates when it receives 4K canvas metrics with at most 1% drops, P95 upload and composite latencies of at most 8 ms each, and a RAM-bandwidth measurement from the probe. Use these acceptance checks to exercise the 4K base case:
 - One 3840 x 2160 stream at 60 fps.
 - Run `native_video_run_base_case_probe` with a 4K source `sourcePath` when FFmpeg is available; use the synthetic path only to validate IPC/compositor plumbing.
 - UI thread remains responsive.
@@ -249,13 +225,8 @@ Calibrated assumptions:
 - Base-case validation state.
 
 Hard limits:
-- 80% safe-budget multiplier.
+- 80% multiplier for RAM bandwidth and estimated VRAM capacity.
 - Broker queue capacity of 96 packets.
-- Broadcast queue capacity of 32 packets.
-- Maximum 1 active stream before base validation.
-- Maximum 32 active visible source assets after validation.
+- Active-stream caps of 1 uncalibrated, 2–4 partially calibrated, and 32 validated.
 - Fixed quality tier list.
 - Rendered-pixel cap.
-
-Known implementation gap:
-- The always-on visible-asset workers still emit synthetic RGBA frames. The base-case command supports real FFmpeg decode for calibration, but a production decoder backend still needs to replace the steady-state generator while preserving the worker assignment, packet, broker, telemetry, and arbitration contracts above.

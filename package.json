@@ -18,6 +18,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview --host 0.0.0.0",
     "test": "vitest run",
+    "architecture:generate": "node scripts/architecture/cli.ts --write",
+    "architecture:check": "node scripts/architecture/cli.ts --check",
     "lint": "pnpm exec biome check",
     "lint:apply": "pnpm exec biome check --fix",
     "bench": "node ./scripts/run-vitest-benchmarks.mjs",

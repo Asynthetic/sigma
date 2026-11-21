@@ -49,6 +49,9 @@ jobs:
       - name: Lint with Biome
         run: pnpm lint
 
+      - name: Check architecture graph drift
+        run: pnpm architecture:check
+
       - name: Run tests
         run: pnpm test
 

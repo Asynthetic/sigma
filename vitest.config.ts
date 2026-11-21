@@ -20,7 +20,10 @@ export default defineConfig({
     execArgv: ["--no-webstorage"],
     setupFiles: ["./src/setupTests.ts"],
     globals: true,
-    include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    include: [
+      "src/**/*.{test,spec}.{ts,tsx}",
+      "scripts/architecture/*.test.ts",
+    ],
     exclude: ["e2e/**"],
     benchmark: {
       includeSamples: true,

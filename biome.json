@@ -36,6 +36,17 @@
       "preset": "recommended"
     }
   },
+  "overrides": [
+    {
+      "includes": [
+        "docs/architecture/graph.json",
+        "docs/architecture/agent-context.json"
+      ],
+      "formatter": {
+        "enabled": false
+      }
+    }
+  ],
   "javascript": {
     "formatter": {
       "trailingCommas": "all",

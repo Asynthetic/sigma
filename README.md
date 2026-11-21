@@ -42,6 +42,10 @@ Video/images are first class assets active in spatial state.
 - **Styling**: Tailwind CSS/shadcn
 - **Testing**: Vitest, Playwright, Criterion
 
+## Architecture
+
+See the [architecture overview](docs/architecture/overview.md), [agent context](docs/architecture/agent-context.json), and [graph maintenance guide](docs/architecture/README.md).
+
 ## Getting Started
 
 ### Prerequisites
