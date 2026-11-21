@@ -1,0 +1,1042 @@
+{
+  "schemaVersion": 1,
+  "subsystems": {
+    "canvas": "React and Zustand",
+    "ipc": "Tauri IPC",
+    "media": "Native media",
+    "persistence": "Persistence"
+  },
+  "nodes": {
+    "canvas.app": {
+      "subsystem": "canvas",
+      "label": "App",
+      "source": {
+        "path": "src/App.tsx",
+        "symbol": "App"
+      }
+    },
+    "canvas.audio": {
+      "subsystem": "canvas",
+      "label": "useAudioPlaybackStore",
+      "source": {
+        "path": "src/stores/useAudioPlaybackStore.ts",
+        "symbol": "useAudioPlaybackStore"
+      }
+    },
+    "canvas.editor": {
+      "subsystem": "canvas",
+      "label": "InfiniteCanvas",
+      "source": {
+        "path": "src/InfiniteCanvas.tsx",
+        "symbol": "InfiniteCanvas"
+      },
+      "notes": [
+        {
+          "provenance": "declared",
+          "path": "docs/engineering-audit.md",
+          "excerpt": "React's `InfiniteCanvas` coordinates interaction, viewport and media components."
+        }
+      ],
+      "tests": [
+        "src/InfiniteCanvas.interactions.test.tsx"
+      ]
+    },
+    "canvas.interaction": {
+      "subsystem": "canvas",
+      "label": "useInteractionStore",
+      "source": {
+        "path": "src/stores/useInteractionStore.ts",
+        "symbol": "useInteractionStore"
+      }
+    },
+    "canvas.settings": {
+      "subsystem": "canvas",
+      "label": "useSettingsStore",
+      "source": {
+        "path": "src/stores/useSettingsStore.ts",
+        "symbol": "useSettingsStore"
+      }
+    },
+    "canvas.zustand": {
+      "subsystem": "canvas",
+      "label": "zustand",
+      "source": {
+        "path": "package.json",
+        "symbol": "zustand"
+      },
+      "notes": [
+        {
+          "provenance": "declared",
+          "path": "docs/engineering-audit.md",
+          "excerpt": "Zustand stores own the canvas session, settings, interaction and audio state."
+        }
+      ]
+    },
+    "ipc.builder": {
+      "subsystem": "ipc",
+      "label": "configure_tauri_builder",
+      "source": {
+        "path": "src-tauri/src/lib.rs",
+        "symbol": "configure_tauri_builder"
+      }
+    },
+    "ipc.client": {
+      "subsystem": "ipc",
+      "label": "@tauri-apps/api/core",
+      "source": {
+        "path": "package.json",
+        "symbol": "@tauri-apps/api"
+      }
+    },
+    "media.actions": {
+      "subsystem": "media",
+      "label": "CanvasActions.tsx",
+      "source": {
+        "path": "src/components/CanvasActions.tsx"
+      }
+    },
+    "media.broker": {
+      "subsystem": "media",
+      "label": "spawn_frame_broker",
+      "source": {
+        "path": "src-tauri/src/native_video/worker.rs",
+        "symbol": "spawn_frame_broker"
+      }
+    },
+    "media.client": {
+      "subsystem": "media",
+      "label": "media.tsx",
+      "source": {
+        "path": "src/utils/media.tsx"
+      }
+    },
+    "media.commands": {
+      "subsystem": "media",
+      "label": "Media commands",
+      "source": {
+        "path": "src-tauri/src/lib.rs"
+      },
+      "tests": [
+        "src-tauri/tests/media_ipc.rs"
+      ]
+    },
+    "media.controller": {
+      "subsystem": "media",
+      "label": "spawn_controller",
+      "source": {
+        "path": "src-tauri/src/native_video/controller.rs",
+        "symbol": "spawn_controller"
+      }
+    },
+    "media.decode": {
+      "subsystem": "media",
+      "label": "DecodeArbiter",
+      "source": {
+        "path": "src-tauri/src/decode_arbiter.rs",
+        "symbol": "DecodeArbiter"
+      }
+    },
+    "media.decoder": {
+      "subsystem": "media",
+      "label": "spawn_decode_worker",
+      "source": {
+        "path": "src-tauri/src/native_video/worker.rs",
+        "symbol": "spawn_decode_worker"
+      },
+      "tests": [
+        "desktop-tests/lifecycle.mjs"
+      ]
+    },
+    "media.ffmpeg": {
+      "subsystem": "media",
+      "label": "ffmpeg",
+      "source": {
+        "path": "src-tauri/src/native_video/worker.rs",
+        "symbol": "TokioCommand::new(\"ffmpeg\")"
+      }
+    },
+    "media.image": {
+      "subsystem": "media",
+      "label": "NativeImageSurface",
+      "source": {
+        "path": "src/components/native-image/NativeImageSurface.tsx",
+        "symbol": "NativeImageSurface"
+      },
+      "notes": [
+        {
+          "provenance": "declared",
+          "path": "docs/engineering-audit.md",
+          "excerpt": "Images have a separate worker-backed compositor and decode queue."
+        }
+      ]
+    },
+    "media.imageworker": {
+      "subsystem": "media",
+      "label": "nativeImageCompositor.worker.ts",
+      "source": {
+        "path": "src/workers/nativeImageCompositor.worker.ts"
+      },
+      "tests": [
+        "src/workers/nativeImageCompositor.worker.test.ts"
+      ]
+    },
+    "media.manifest": {
+      "subsystem": "media",
+      "label": "useNativeVideoManifest",
+      "source": {
+        "path": "src/components/native-video/useNativeVideoManifest.ts",
+        "symbol": "useNativeVideoManifest"
+      },
+      "tests": [
+        "src/components/native-video/useNativeVideoManifest.test.ts"
+      ]
+    },
+    "media.monitor": {
+      "subsystem": "media",
+      "label": "spawn_resource_monitor",
+      "source": {
+        "path": "src-tauri/src/native_video/resource_monitor.rs",
+        "symbol": "spawn_resource_monitor"
+      }
+    },
+    "media.packet": {
+      "subsystem": "media",
+      "label": "write_yuv420_packet_from_payload",
+      "source": {
+        "path": "src-tauri/src/native_video/frame_packet.rs",
+        "symbol": "write_yuv420_packet_from_payload"
+      },
+      "notes": [
+        {
+          "provenance": "declared",
+          "path": "src-tauri/src/native_video/frame_packet.rs",
+          "excerpt": "SVF1 payloads are packed as YUV420 planar bytes at 1.5 Bpp."
+        }
+      ]
+    },
+    "media.state": {
+      "subsystem": "media",
+      "label": "NativeVideoState",
+      "source": {
+        "path": "src-tauri/src/native_video/state.rs",
+        "symbol": "NativeVideoState"
+      }
+    },
+    "media.video": {
+      "subsystem": "media",
+      "label": "NativeVideoSurface",
+      "source": {
+        "path": "src/components/native-video/NativeVideoSurface.tsx",
+        "symbol": "NativeVideoSurface"
+      },
+      "notes": [
+        {
+          "provenance": "declared",
+          "path": "src/components/native-video/NativeVideoSurface.tsx",
+          "excerpt": "profile.baseCaseValidated || shouldForceNativePlayback()"
+        }
+      ]
+    },
+    "media.videocommands": {
+      "subsystem": "media",
+      "label": "Native video commands",
+      "source": {
+        "path": "src-tauri/src/native_video/commands.rs"
+      },
+      "tests": [
+        "src-tauri/tests/native_video_scope.rs"
+      ]
+    },
+    "media.videoworker": {
+      "subsystem": "media",
+      "label": "nativeVideoCompositor.worker.ts",
+      "source": {
+        "path": "src/workers/nativeVideoCompositor.worker.ts"
+      }
+    },
+    "persistence.atomic": {
+      "subsystem": "persistence",
+      "label": "Atomic project save",
+      "source": {
+        "path": "src-tauri/src/canvas_persistence.rs"
+      },
+      "notes": [
+        {
+          "provenance": "declared",
+          "path": "docs/engineering-audit.md",
+          "excerpt": "Ordinary failures before replacement remove the temporary file and leave the previous destination untouched."
+        }
+      ],
+      "tests": [
+        "src-tauri/tests/canvas_persistence.rs"
+      ]
+    },
+    "persistence.files": {
+      "subsystem": "persistence",
+      "label": "fs.ts",
+      "source": {
+        "path": "src/utils/fs.ts"
+      },
+      "notes": [
+        {
+          "provenance": "declared",
+          "path": "docs/engineering-audit.md",
+          "excerpt": "Session JSON stores asset paths relative to the selected project file when possible."
+        }
+      ],
+      "tests": [
+        "src/utils/fs.test.ts"
+      ]
+    },
+    "persistence.profile": {
+      "subsystem": "persistence",
+      "label": "Native video profile",
+      "source": {
+        "path": "src-tauri/src/native_video/profile.rs",
+        "symbol": "persist_profile"
+      }
+    },
+    "persistence.session": {
+      "subsystem": "persistence",
+      "label": "useCanvasSessionStore",
+      "source": {
+        "path": "src/stores/useCanvasSessionStore.ts",
+        "symbol": "useCanvasSessionStore"
+      },
+      "notes": [
+        {
+          "provenance": "declared",
+          "path": "docs/engineering-audit.md",
+          "excerpt": "Save, Save As, and Load requests use one in-process FIFO."
+        },
+        {
+          "provenance": "declared",
+          "path": "src/stores/useCanvasSessionStore.ts",
+          "excerpt": "const SESSION_STORAGE_KEY = \"sigma:canvas-session\";"
+        }
+      ],
+      "tests": [
+        "src/stores/useCanvasSessionStore.test.ts"
+      ]
+    }
+  },
+  "edges": [
+    {
+      "from": "canvas.app",
+      "to": "canvas.editor",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/App.tsx",
+          "symbol": "./InfiniteCanvas"
+        }
+      ]
+    },
+    {
+      "from": "canvas.audio",
+      "to": "canvas.zustand",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/stores/useAudioPlaybackStore.ts",
+          "symbol": "zustand"
+        }
+      ]
+    },
+    {
+      "from": "canvas.editor",
+      "to": "canvas.audio",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/InfiniteCanvas.tsx",
+          "symbol": "./stores/useAudioPlaybackStore"
+        }
+      ]
+    },
+    {
+      "from": "canvas.editor",
+      "to": "canvas.interaction",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/InfiniteCanvas.tsx",
+          "symbol": "./stores/useInteractionStore"
+        }
+      ]
+    },
+    {
+      "from": "canvas.editor",
+      "to": "canvas.settings",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/InfiniteCanvas.tsx",
+          "symbol": "./stores/useSettingsStore"
+        }
+      ]
+    },
+    {
+      "from": "canvas.editor",
+      "to": "media.actions",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/InfiniteCanvas.tsx",
+          "symbol": "./components/CanvasActions"
+        }
+      ]
+    },
+    {
+      "from": "canvas.editor",
+      "to": "media.client",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/InfiniteCanvas.tsx",
+          "symbol": "./utils/media"
+        }
+      ]
+    },
+    {
+      "from": "canvas.editor",
+      "to": "media.image",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/InfiniteCanvas.tsx",
+          "symbol": "./components/native-image/NativeImageSurface"
+        }
+      ]
+    },
+    {
+      "from": "canvas.editor",
+      "to": "media.video",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/InfiniteCanvas.tsx",
+          "symbol": "./components/native-video/NativeVideoSurface"
+        }
+      ]
+    },
+    {
+      "from": "canvas.editor",
+      "to": "persistence.files",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/InfiniteCanvas.tsx",
+          "symbol": "./utils/fs"
+        }
+      ]
+    },
+    {
+      "from": "canvas.editor",
+      "to": "persistence.session",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/InfiniteCanvas.tsx",
+          "symbol": "./stores/useCanvasSessionStore"
+        }
+      ]
+    },
+    {
+      "from": "canvas.interaction",
+      "to": "canvas.zustand",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/stores/useInteractionStore.ts",
+          "symbol": "zustand"
+        }
+      ]
+    },
+    {
+      "from": "canvas.settings",
+      "to": "canvas.zustand",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/stores/useSettingsStore.ts",
+          "symbol": "zustand"
+        }
+      ]
+    },
+    {
+      "from": "ipc.builder",
+      "to": "media.commands",
+      "type": "registers",
+      "provenance": "verified",
+      "commands": [
+        "clear_media_cache",
+        "export_video",
+        "generate_image_preview",
+        "generate_video_thumbnail",
+        "media_cache_stats",
+        "probe_images",
+        "probe_media",
+        "request_decode",
+        "save_media_screenshot"
+      ],
+      "evidence": [
+        {
+          "path": "src-tauri/src/lib.rs",
+          "symbol": "tauri::generate_handler!"
+        },
+        {
+          "path": "src-tauri/src/lib.rs",
+          "symbol": "#[tauri::command]"
+        }
+      ]
+    },
+    {
+      "from": "ipc.builder",
+      "to": "media.state",
+      "type": "initializes",
+      "evidence": [
+        {
+          "path": "src-tauri/src/lib.rs",
+          "symbol": "app.manage(native_video::NativeVideoState::new("
+        }
+      ],
+      "provenance": "declared"
+    },
+    {
+      "from": "ipc.builder",
+      "to": "media.videocommands",
+      "type": "registers",
+      "provenance": "verified",
+      "commands": [
+        "native_video_get_profile",
+        "native_video_record_frontend_metrics",
+        "native_video_reset_profile",
+        "native_video_run_base_case_probe",
+        "native_video_stop_all",
+        "native_video_subscribe_frames",
+        "native_video_subscribe_telemetry",
+        "native_video_update_manifest"
+      ],
+      "evidence": [
+        {
+          "path": "src-tauri/src/lib.rs",
+          "symbol": "tauri::generate_handler!"
+        },
+        {
+          "path": "src-tauri/src/native_video/commands.rs",
+          "symbol": "#[tauri::command]"
+        }
+      ]
+    },
+    {
+      "from": "ipc.builder",
+      "to": "persistence.atomic",
+      "type": "registers",
+      "provenance": "verified",
+      "commands": [
+        "save_canvas_atomic"
+      ],
+      "evidence": [
+        {
+          "path": "src-tauri/src/lib.rs",
+          "symbol": "tauri::generate_handler!"
+        },
+        {
+          "path": "src-tauri/src/canvas_persistence.rs",
+          "symbol": "#[tauri::command]"
+        }
+      ]
+    },
+    {
+      "from": "media.actions",
+      "to": "ipc.client",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/components/CanvasActions.tsx",
+          "symbol": "@tauri-apps/api/core"
+        }
+      ]
+    },
+    {
+      "from": "media.actions",
+      "to": "media.client",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/components/CanvasActions.tsx",
+          "symbol": "../utils/media"
+        }
+      ]
+    },
+    {
+      "from": "media.actions",
+      "to": "media.commands",
+      "type": "invokes",
+      "provenance": "verified",
+      "commands": [
+        "probe_images",
+        "probe_media"
+      ],
+      "evidence": [
+        {
+          "path": "src/components/CanvasActions.tsx",
+          "symbol": "@tauri-apps/api/core"
+        },
+        {
+          "path": "src-tauri/src/lib.rs",
+          "symbol": "#[tauri::command]"
+        }
+      ]
+    },
+    {
+      "from": "media.broker",
+      "to": "media.video",
+      "type": "frame_channel",
+      "evidence": [
+        {
+          "path": "docs/native-video-playback.md",
+          "symbol": "Tauri v2 channels are the frame plane."
+        },
+        {
+          "path": "src-tauri/src/native_video/worker.rs",
+          "symbol": "InvokeResponseBody::Raw"
+        },
+        {
+          "path": "src/components/native-video/NativeVideoSurface.tsx",
+          "symbol": "new Channel<ArrayBuffer>()"
+        }
+      ],
+      "provenance": "declared"
+    },
+    {
+      "from": "media.client",
+      "to": "ipc.client",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/utils/media.tsx",
+          "symbol": "@tauri-apps/api/core"
+        }
+      ]
+    },
+    {
+      "from": "media.client",
+      "to": "media.commands",
+      "type": "invokes",
+      "provenance": "verified",
+      "commands": [
+        "export_video",
+        "generate_image_preview",
+        "generate_video_thumbnail",
+        "request_decode",
+        "save_media_screenshot"
+      ],
+      "evidence": [
+        {
+          "path": "src/utils/media.tsx",
+          "symbol": "@tauri-apps/api/core"
+        },
+        {
+          "path": "src-tauri/src/lib.rs",
+          "symbol": "#[tauri::command]"
+        }
+      ]
+    },
+    {
+      "from": "media.commands",
+      "to": "media.decode",
+      "type": "delegates",
+      "evidence": [
+        {
+          "path": "src-tauri/src/lib.rs",
+          "symbol": ".request_decode(item_id"
+        }
+      ],
+      "provenance": "declared"
+    },
+    {
+      "from": "media.controller",
+      "to": "media.decoder",
+      "type": "assigns",
+      "evidence": [
+        {
+          "path": "docs/engineering-audit.md",
+          "symbol": "the Rust controller arbitrates budgets and launches FFmpeg decode workers"
+        },
+        {
+          "path": "src-tauri/src/native_video/controller.rs",
+          "symbol": "reconcile_workers("
+        }
+      ],
+      "provenance": "declared"
+    },
+    {
+      "from": "media.decoder",
+      "to": "media.broker",
+      "type": "queues_frames",
+      "evidence": [
+        {
+          "path": "src-tauri/src/native_video/worker.rs",
+          "symbol": "broker_tx.try_send("
+        }
+      ],
+      "provenance": "declared"
+    },
+    {
+      "from": "media.decoder",
+      "to": "media.ffmpeg",
+      "type": "starts_process",
+      "evidence": [
+        {
+          "path": "src-tauri/src/native_video/worker.rs",
+          "symbol": "spawn_ffmpeg_rawvideo_decoder(&source_path"
+        },
+        {
+          "path": "src-tauri/src/native_video/worker.rs",
+          "symbol": "format=yuv420p"
+        }
+      ],
+      "provenance": "declared"
+    },
+    {
+      "from": "media.decoder",
+      "to": "media.packet",
+      "type": "encodes",
+      "evidence": [
+        {
+          "path": "src-tauri/src/native_video/worker.rs",
+          "symbol": "write_yuv420_packet_from_payload("
+        }
+      ],
+      "provenance": "declared"
+    },
+    {
+      "from": "media.image",
+      "to": "media.imageworker",
+      "type": "starts_worker",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/components/native-image/NativeImageSurface.tsx",
+          "symbol": "new Worker"
+        },
+        {
+          "path": "src/workers/nativeImageCompositor.worker.ts"
+        }
+      ]
+    },
+    {
+      "from": "media.state",
+      "to": "media.broker",
+      "type": "initializes",
+      "evidence": [
+        {
+          "path": "src-tauri/src/native_video/state.rs",
+          "symbol": "spawn_frame_broker("
+        }
+      ],
+      "provenance": "declared"
+    },
+    {
+      "from": "media.state",
+      "to": "media.controller",
+      "type": "initializes",
+      "evidence": [
+        {
+          "path": "src-tauri/src/native_video/state.rs",
+          "symbol": "spawn_controller("
+        }
+      ],
+      "provenance": "declared"
+    },
+    {
+      "from": "media.state",
+      "to": "media.monitor",
+      "type": "initializes",
+      "evidence": [
+        {
+          "path": "src-tauri/src/native_video/state.rs",
+          "symbol": "spawn_resource_monitor("
+        }
+      ],
+      "provenance": "declared"
+    },
+    {
+      "from": "media.state",
+      "to": "persistence.profile",
+      "type": "loads",
+      "evidence": [
+        {
+          "path": "src-tauri/src/native_video/state.rs",
+          "symbol": "load_profile(&profile_path)"
+        }
+      ],
+      "provenance": "declared"
+    },
+    {
+      "from": "media.video",
+      "to": "ipc.client",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/components/native-video/NativeVideoSurface.tsx",
+          "symbol": "@tauri-apps/api/core"
+        }
+      ]
+    },
+    {
+      "from": "media.video",
+      "to": "media.manifest",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/components/native-video/NativeVideoSurface.tsx",
+          "symbol": "./useNativeVideoManifest"
+        }
+      ]
+    },
+    {
+      "from": "media.video",
+      "to": "media.videocommands",
+      "type": "invokes",
+      "provenance": "verified",
+      "commands": [
+        "native_video_get_profile",
+        "native_video_record_frontend_metrics",
+        "native_video_run_base_case_probe",
+        "native_video_stop_all",
+        "native_video_subscribe_frames",
+        "native_video_subscribe_telemetry",
+        "native_video_update_manifest"
+      ],
+      "evidence": [
+        {
+          "path": "src/components/native-video/NativeVideoSurface.tsx",
+          "symbol": "@tauri-apps/api/core"
+        },
+        {
+          "path": "src-tauri/src/native_video/commands.rs",
+          "symbol": "#[tauri::command]"
+        }
+      ]
+    },
+    {
+      "from": "media.video",
+      "to": "media.videoworker",
+      "type": "starts_worker",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/components/native-video/NativeVideoSurface.tsx",
+          "symbol": "new Worker"
+        },
+        {
+          "path": "src/workers/nativeVideoCompositor.worker.ts"
+        }
+      ]
+    },
+    {
+      "from": "media.video",
+      "to": "media.videoworker",
+      "type": "worker_message",
+      "evidence": [
+        {
+          "path": "docs/native-video-playback.md",
+          "symbol": "Transfer Tauri channel `ArrayBuffer` packets to the worker."
+        },
+        {
+          "path": "src/components/native-video/NativeVideoSurface.tsx",
+          "symbol": "worker.postMessage({ type: \"frame\""
+        },
+        {
+          "path": "src/workers/nativeVideoCompositor.worker.ts",
+          "symbol": "message.type === \"frame\""
+        }
+      ],
+      "provenance": "declared"
+    },
+    {
+      "from": "media.videocommands",
+      "to": "media.controller",
+      "type": "sends_control",
+      "evidence": [
+        {
+          "path": "src-tauri/src/native_video/commands.rs",
+          "symbol": "ControlMessage::UpdateManifest"
+        },
+        {
+          "path": "src-tauri/src/native_video/controller.rs",
+          "symbol": "ControlMessage::UpdateManifest"
+        }
+      ],
+      "provenance": "declared"
+    },
+    {
+      "from": "media.videocommands",
+      "to": "media.video",
+      "type": "frame_channel",
+      "evidence": [
+        {
+          "path": "src-tauri/src/native_video/commands.rs",
+          "symbol": "ffmpeg-rawvideo-yuv420p"
+        },
+        {
+          "path": "src/components/native-video/NativeVideoSurface.tsx",
+          "symbol": "onFrame: frameChannelRef.current"
+        }
+      ],
+      "provenance": "declared"
+    },
+    {
+      "from": "media.videocommands",
+      "to": "media.video",
+      "type": "telemetry_channel",
+      "evidence": [
+        {
+          "path": "src-tauri/src/native_video/commands.rs",
+          "symbol": "Channel<TelemetrySnapshot>"
+        },
+        {
+          "path": "src/components/native-video/NativeVideoSurface.tsx",
+          "symbol": "new Channel<NativeVideoTelemetrySnapshot>()"
+        }
+      ],
+      "provenance": "declared"
+    },
+    {
+      "from": "media.videocommands",
+      "to": "persistence.profile",
+      "type": "persists",
+      "evidence": [
+        {
+          "path": "src-tauri/src/native_video/commands.rs",
+          "symbol": "persist_profile("
+        },
+        {
+          "path": "src-tauri/src/native_video/profile.rs",
+          "symbol": "native-video-profile.json"
+        }
+      ],
+      "provenance": "declared"
+    },
+    {
+      "from": "media.videoworker",
+      "to": "media.video",
+      "type": "worker_message",
+      "evidence": [
+        {
+          "path": "docs/native-video-playback.md",
+          "symbol": "Post upload/composite/drop/throughput metrics back to Rust."
+        },
+        {
+          "path": "src/workers/nativeVideoCompositor.worker.ts",
+          "symbol": "type: \"metrics\""
+        },
+        {
+          "path": "src/components/native-video/NativeVideoSurface.tsx",
+          "symbol": "message.type !== \"metrics\""
+        }
+      ],
+      "provenance": "declared"
+    },
+    {
+      "from": "persistence.files",
+      "to": "ipc.client",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/utils/fs.ts",
+          "symbol": "@tauri-apps/api/core"
+        }
+      ]
+    },
+    {
+      "from": "persistence.files",
+      "to": "persistence.atomic",
+      "type": "invokes",
+      "provenance": "verified",
+      "commands": [
+        "save_canvas_atomic"
+      ],
+      "evidence": [
+        {
+          "path": "src/utils/fs.ts",
+          "symbol": "@tauri-apps/api/core"
+        },
+        {
+          "path": "src-tauri/src/canvas_persistence.rs",
+          "symbol": "#[tauri::command]"
+        }
+      ]
+    },
+    {
+      "from": "persistence.session",
+      "to": "canvas.settings",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/stores/useCanvasSessionStore.ts",
+          "symbol": "./useSettingsStore"
+        }
+      ]
+    },
+    {
+      "from": "persistence.session",
+      "to": "canvas.zustand",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/stores/useCanvasSessionStore.ts",
+          "symbol": "zustand"
+        }
+      ]
+    },
+    {
+      "from": "persistence.session",
+      "to": "ipc.client",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/stores/useCanvasSessionStore.ts",
+          "symbol": "@tauri-apps/api/core"
+        }
+      ]
+    },
+    {
+      "from": "persistence.session",
+      "to": "persistence.files",
+      "type": "imports",
+      "provenance": "verified",
+      "evidence": [
+        {
+          "path": "src/stores/useCanvasSessionStore.ts",
+          "symbol": "../utils/fs"
+        }
+      ]
+    }
+  ]
+}

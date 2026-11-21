@@ -38,3 +38,7 @@ If the test fails, gauge to fix the test or fix the implementation while prevent
 - Do not introduce ESLint or Prettier; Biome is the formatter/linter.
 
 ## Code exploration — prefer `ast-outline`/`ast-bro` over full reads
+
+## Architecture
+
+Use the [architecture overview](docs/architecture/overview.md) and [agent context](docs/architecture/agent-context.json) to locate the canvas, IPC, media, and persistence code. For changes to those relationships, follow the [graph maintenance guide](docs/architecture/README.md).
